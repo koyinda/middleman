@@ -75,16 +75,13 @@ app.post("/login", function(req, res){
       }
       else
       {
-        console.log(results);
         const match = bcrypt.compareSync(req.body.password, results[0].PASSWORD);
-        console.log(match);
         if(match)
         {
           results[0].PASSWORD=undefined;
           const jt = jwt.sign({match: results}, process.env.keysecond, {
             expiresIn: '1h'
           });
-          //console.log(jt);
           return res.json({
             status: 00,
             message: "login successful",
@@ -228,8 +225,6 @@ app.get("/api/getplanlist/:id", checkToken, function(req, res){
     }
     else
     {
-      console.log(results);
-      //res.redirect("/");
       res.send( JSON.parse(JSON.stringify(results)));
     }
       
@@ -257,9 +252,9 @@ app.get("/api/usagehistory/:id", checkToken, function(req, res){
         //console.log(update)
         const querySql = 'Select DATE_SUB(aclog.ACCTDATE, INTERVAL (aclog.ACCTSESSIONTIME) SECOND) StartDate, aclog.ACCTDATE EndDate, users.USERID USERID, aclog.IMSI IMSI, INET_NTOA(aclog.framedaddress) IP, round((aclog.ACCTTOTALOCTETS)/(1024*1024),2) MBUsed FROM accountinglog aclog JOIN users ON users.USERINDEX=aclog.USERID where 1=1 and date(aclog.ACCTDATE) between date(?) and date(?) and aclog.userid= ? order by aclog.ACCTDATE desc'
         connection.query({sql: querySql,timeout: 40000 },update, function (error, results, fields) {
-            if (error)
+            if (error || results.length ==0)
             {
-              console.log(error || results.length ==0)
+              console.log(error)
               console.log("something is not right");
                 return res.json({
                   status: 99,
@@ -361,9 +356,9 @@ app.post("/api/speed/:id", checkToken, function(req, res){
         //console.log(update)
         const querySql = 'update users set speed=? where userindex = ?'
         connection.query({sql: querySql,timeout: 40000 },update, function (error, results, fields) {
-            if (error)
+            if (error|| results.length ==0)
             {
-              console.log(error || results.length ==0)
+              console.log(error)
               console.log("something is not right");
                 return res.json({
                   status: 99,
@@ -397,14 +392,8 @@ app.post("/api/postpayment", checkToken, function(req, res){
       }
       else
       {
-        //console.log("2")
+
         const insert = [
-          /*
-            "userid" : "14386298",
-            "amount" : "2",
-            "paymentmethod" : "Test_Spectranet",
-            "paymentreference" : "Oyin|BRH|DAM|12-04-2019|wqssde1"
-          */
           req.body.paymentmethod,
           results[0].USERINDEX,
           req.body.amount,
@@ -417,8 +406,7 @@ app.post("/api/postpayment", checkToken, function(req, res){
           req.body.amount,
           results[0].USERINDEX
         ]
-        //console.log(insert)
-       // const querySql = 'insert into `payments`(`PAYMENTMETHOD`,`CREATEDATE`,`USERTYPE`,`USERINDEX`,`AMOUNT`,`REMARK`,`EXPORTED1`,`STATUS`,`WEBPAYMENTTYPE`,`UUID`,`PAYMENTID`,`PAYMENTAMOUNT`,`PAYMENTCURRENCYRATE`) values (?,DATE_ADD(NOW(), INTERVAL 1 HOUR),1,?,?,?,1,0,"",?,?,?,1)'
+ 
         connection.beginTransaction(function(err) {
           if (err) { throw err; }
           const querySql = 'insert into `payments`(`PAYMENTMETHOD`,`CREATEDATE`,`USERTYPE`,`USERINDEX`,`AMOUNT`,`REMARK`,`EXPORTED1`,`STATUS`,`WEBPAYMENTTYPE`,`UUID`,`PAYMENTID`,`PAYMENTAMOUNT`,`PAYMENTCURRENCYRATE`) values (?,DATE_ADD(NOW(), INTERVAL 1 HOUR),1,?,?,?,1,0,"",?,?,?,1)'
