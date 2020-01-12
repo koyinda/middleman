@@ -4,3 +4,4 @@ to check out hosted version visted to https://aqueous-anchorage-36905.herokuapp.
 and visit https://aqueous-anchorage-36905.herokuapp.com/login to login and generate bearer token to call apis
 API EXPLANATION
 work in progress
+need to apply sorting to the history APIs
