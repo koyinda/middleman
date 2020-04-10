@@ -1,2 +1,2 @@
 # middleman
-a collection of RESTful API serviceS.. built with nodeJS, MySql.
+a collection of RESTful API services.. built with nodeJS, MySql.
